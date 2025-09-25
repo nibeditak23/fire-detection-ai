@@ -1,0 +1,18 @@
+# Python environment
+fire-env/
+*.pyc
+__pycache__/
+
+# VS Code settings
+.vscode/
+
+# Outputs and temporary files
+outputs/
+temp_*
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
