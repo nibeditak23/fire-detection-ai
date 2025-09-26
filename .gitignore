@@ -1,17 +1,17 @@
-# Python environment
-fire-env/
-*.pyc
+# Python cache
 __pycache__/
+*.pyc
 
-# VS Code settings
-.vscode/
+# Virtual environment
+fire-env/
+venv/
+.venv/
 
-# Outputs and temporary files
-outputs/
-temp_*
-
-# Jupyter notebooks checkpoints
-.ipynb_checkpoints/
+# Data and models
+*.zip
+*.pt
+*.weights
+runs/
 
 # OS files
 .DS_Store

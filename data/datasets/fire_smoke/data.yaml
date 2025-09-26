@@ -1,0 +1,5 @@
+train: data/datasets/fire_smoke/train/images
+val: data/datasets/fire_smoke/val/images
+
+nc: 2
+names: ['fire', 'smoke']
