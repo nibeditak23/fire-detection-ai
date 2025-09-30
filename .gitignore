@@ -11,8 +11,16 @@ venv/
 *.zip
 *.pt
 *.weights
-runs/
 
 # OS files
 .DS_Store
 Thumbs.db
+
+# Ignore datasets and outputs
+data/datasets/
+outputs/
+runs/
+
+# Ignore temporary files
+*.cache
+*.log

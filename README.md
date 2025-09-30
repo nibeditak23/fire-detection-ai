@@ -21,14 +21,16 @@ Currently, the project is at the **basic detection stage**, using **YOLOv8 pre-t
 
 fire-detection-ai/
 ├── data/
-│ ├── images/ # Test images for detection
-├── src/ # Source code (fire_detector.py)
-├── outputs/ # Detection results
-├── tests/ # Test scripts
-├── docs/ # Project documentation
-├── requirements.txt # Python dependencies
-├── README.md # Project overview and instructions
-└── .gitignore # Files/folders to ignore in Git
+│ ├── images/ # Test/demo images
+│ ├── models/ # Trained YOLOv8 weights (best.pt here)
+│ └── datasets/ # Training datasets (ignored in git)
+├── src/
+│ └── fire_detector.py # Inference script
+├── outputs/ # Saved inference results (ignored in git)
+├── tests/ # For future unit tests
+├── docs/ # Documentation/notes
+├── requirements.txt # Dependencies
+└── README.md
 
 ---
 
@@ -64,3 +66,43 @@ YOLOv8 is pre-trained on COCO dataset, not fire-specific.
 Initial test detections may pick up unrelated objects (e.g., person, pizza) instead of fire.
 
 Fine-tuning with a fire-specific dataset will be implemented in upcoming steps.
+🏋️ Training (in Colab)
+
+We trained the model in Google Colab using fire_smoke.zip dataset.
+
+Steps:
+
+Upload fire_smoke.zip to Drive (/MyDrive/fire_detection/datasets/).
+
+Run the provided Colab notebook (fire_yolov8_day4_xxx.ipynb).
+
+Training will generate weights:
+
+best.pt → best-performing weights
+
+last.pt → last saved weights
+
+Save best.pt into:
+
+data/models/best.pt
+
+🔍 Inference (Local)
+
+Run detection on a single image:
+
+python src/fire_detector.py --mode single --path data/images/fire18.jpg
+
+
+Run on all images in a folder:
+
+python src/fire_detector.py --mode folder --path data/images
+
+
+Annotated results are saved in:
+
+outputs/
+
+
+Example:
+
+fire18.jpg → 2 detections (2 fires)
