@@ -1,7 +1,7 @@
 # Fire Detection AI 🚨🔥
 
-🔥 This project uses **YOLOv8** to detect **fire and smoke** in images, videos, and webcam streams.  
-It is designed as the foundation for a **fire safety AI system** with alerting and multi-camera support.
+🔥 An AI-powered fire & smoke detection system using YOLOv8.  
+Supports inference on **images, videos, webcam feeds, and multiple camera sources** (via `multi_cam_detector.py`).  
 
 ---
 
@@ -20,18 +20,31 @@ This project aims to build an AI-powered **fire and smoke detection system** usi
 
 fire-detection-ai/
 ├── data/
-│ ├── images/ # Test/demo images
-│ ├── models/ # Trained YOLOv8 weights (best.pt here)
-│ └── datasets/ # Training datasets (ignored in git)
+│ ├── images/ # Test images for inference
+│ ├── videos/ # Test/demo videos
+│ ├── models/ # Trained models (best.pt etc.)
+│ └── datasets/ # Training datasets (not in repo, stored in Drive)
 ├── src/
-│ └── fire_detector.py # Inference script
-├── outputs/ # Saved inference results (ignored in git)
-├── tests/ # For future unit tests
-├── docs/ # Documentation/notes
+│ ├── fire_detector.py # Single feed inference (image/video/webcam/folder)
+│ ├── multi_cam_detector.py # Multi-camera real-time monitoring
+├── outputs/ # Saved inference results (images/videos/logs)
+├── tests/ # Unit tests (future)
+├── docs/ # Documentation
 ├── requirements.txt # Dependencies
-└── README.md
+├── README.md # Project overview
+└── .gitignore
 
 ---
+## 🚀 Features
+
+- Detects **fire** and **smoke** using YOLOv8.
+- Works with:
+  - Images (`--mode folder --path data/images`)
+  - Videos (`--mode video --path data/videos/sample.mp4`)
+  - Webcam (`--mode webcam`)
+  - Multiple cameras (`multi_cam_detector.py` + `cameras.json`)
+- Saves annotated results in `outputs/`
+- Logs detections with **camera name + timestamp**.
 
 ## **Setup Instructions**
 
@@ -58,7 +71,8 @@ last.pt → last saved weights
 Save best.pt into:
 data/models/best.pt
 
-### 🔍 Inference (Local)
+### 📦 Usage - fire_detector.py
+## 🔹 Single feed detection
 
 # 1. Run detection on a single image:
 python src/fire_detector.py --mode single --path data/images/fire18.jpg
@@ -72,13 +86,31 @@ python src/fire_detector.py --mode video --path data/videos/
 python src/fire_detector.py --mode webcam
 # 6. Webcam + Save recording
 python src/fire_detector.py --mode webcam --save-webcam
-
 # note - for videos and webcam - Press q to quit
-
 # Annotated results are saved in:
 outputs/
 Example:
 fire18.jpg → 2 detections (2 fires)
+
+## 🔹 Multi-camera detection
+Configure your sources in cameras.json:(test)
+[
+  { "name": "Parking-Cam", "source": "data/videos/test_fire.mp4" },
+  { "name": "Warehouse-Cam", "source": "data/videos/test_smoke.mp4" }
+]
+Prod like:
+[
+  { "name": "Lobby-Cam", "source": "rtsp://192.168.1.10:554/live" },
+  { "name": "Parking-Cam", "source": "rtsp://192.168.1.11:554/live" },
+  { "name": "Server-Room-Cam", "source": "0" }   // local webcam
+]
+Run:
+python src/multi_cam_detector.py
+# 📊 Outputs
+Annotated images → outputs/
+Annotated videos → outputs/videos/
+Logs → outputs/multicam_YYYY-MM-DD.log
+
 ### 📦 Model
 Place your trained YOLOv8 model (best.pt) inside data/models/
 Default used in code: data/models/best.pt
@@ -87,9 +119,9 @@ Default used in code: data/models/best.pt
 Detect fire & smoke in images, videos, and webcam
 Saves annotated results into /outputs
 Works with your custom-trained YOLOv8 model
+multi-feed camera support 
 
 ### 📅 Next Steps
- Add multi-feed camera support (Day 5)
  Implement alert system integration (Day 6–7)
  Build dashboard/UI for live monitoring (Day 11–13)
  Plan continuous fine-tuning with new data

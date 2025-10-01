@@ -9,7 +9,7 @@ venv/
 
 # Data and models
 *.zip
-*.pt
+yolov8s.pt
 *.weights
 
 # OS files
