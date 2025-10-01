@@ -1,7 +1,7 @@
-# AI Fire Detection Project
+# Fire Detection AI 🚨🔥
 
-🔥 **Project:** AI Fire Detection using YOLOv8  
-📅 **Progress:** Day-2 – Basic fire detection script implemented with test images  
+🔥 This project uses **YOLOv8** to detect **fire and smoke** in images, videos, and webcam streams.  
+It is designed as the foundation for a **fire safety AI system** with alerting and multi-camera support.
 
 ---
 
@@ -13,7 +13,6 @@ This project aims to build an AI-powered **fire and smoke detection system** usi
 2. Fire risk prediction  
 3. Automated alerting system  
 
-Currently, the project is at the **basic detection stage**, using **YOLOv8 pre-trained model**. Note that YOLOv8 is **not trained specifically for fire**, so detections may pick up unrelated objects. Fine-tuning on a fire-specific dataset will be implemented in later steps.
 
 ---
 
@@ -47,62 +46,50 @@ python -m venv fire-env
 fire-env\Scripts\activate      # Windows
 # Install dependencies
 pip install -r requirements.txt
-3. Folder Preparation
 
-Ensure you have the following folders and at least one test image in:
-data/images/
-Running Basic Fire Detection
-Test Script
-python src/fire_detector.py
-This will run YOLOv8 on the test images in data/images/
-
-Output images with bounding boxes will be saved in outputs/
-
-Detected boxes and confidence will be printed in the terminal
-Current Notes / Limitations
-
-YOLOv8 is pre-trained on COCO dataset, not fire-specific.
-
-Initial test detections may pick up unrelated objects (e.g., person, pizza) instead of fire.
-
-Fine-tuning with a fire-specific dataset will be implemented in upcoming steps.
-🏋️ Training (in Colab)
-
+### 🏋️ Training (in Colab)
 We trained the model in Google Colab using fire_smoke.zip dataset.
-
-Steps:
-
+# Steps:
 Upload fire_smoke.zip to Drive (/MyDrive/fire_detection/datasets/).
-
 Run the provided Colab notebook (fire_yolov8_day4_xxx.ipynb).
-
 Training will generate weights:
-
 best.pt → best-performing weights
-
 last.pt → last saved weights
-
 Save best.pt into:
-
 data/models/best.pt
 
-🔍 Inference (Local)
+### 🔍 Inference (Local)
 
-Run detection on a single image:
-
+# 1. Run detection on a single image:
 python src/fire_detector.py --mode single --path data/images/fire18.jpg
-
-
-Run on all images in a folder:
-
+# 2. Run on all images in a folder:
 python src/fire_detector.py --mode folder --path data/images
+# 3. Run inference on a video file
+python src/fire_detector.py --mode video --path data/videos/test_fire.mp4
+# 4. Detect all videos in a folder
+python src/fire_detector.py --mode video --path data/videos/
+# 5. Run inference with webcam
+python src/fire_detector.py --mode webcam
+# 6. Webcam + Save recording
+python src/fire_detector.py --mode webcam --save-webcam
 
+# note - for videos and webcam - Press q to quit
 
-Annotated results are saved in:
-
+# Annotated results are saved in:
 outputs/
-
-
 Example:
-
 fire18.jpg → 2 detections (2 fires)
+### 📦 Model
+Place your trained YOLOv8 model (best.pt) inside data/models/
+Default used in code: data/models/best.pt
+
+### ✅ Current Features
+Detect fire & smoke in images, videos, and webcam
+Saves annotated results into /outputs
+Works with your custom-trained YOLOv8 model
+
+### 📅 Next Steps
+ Add multi-feed camera support (Day 5)
+ Implement alert system integration (Day 6–7)
+ Build dashboard/UI for live monitoring (Day 11–13)
+ Plan continuous fine-tuning with new data
