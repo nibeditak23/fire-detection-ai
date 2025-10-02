@@ -1,34 +1,75 @@
+# src/fire_detector.py
+from ultralytics import YOLO
 import cv2
 import os
+import sys
 import json
 import threading
 import datetime
-from ultralytics import YOLO
 import pygame
+import uuid, hashlib
 
+# ---------------- HWID ----------------
+def get_hardware_id():
+    mac = uuid.getnode()
+    system_info = f"{mac}-{os.getenv('COMPUTERNAME', '')}"
+    return hashlib.sha256(system_info.encode()).hexdigest()
 
+# ---------------- License ----------------
+def validate_license(license_file="license.lic"):
+    if not os.path.exists(license_file):
+        print(f"❌ License file '{license_file}' not found!")
+        sys.exit(1)
+
+    with open(license_file, "r") as f:
+        licensed_hwid = f.read().strip()
+
+    current_hwid = get_hardware_id()
+    if licensed_hwid != current_hwid:
+        print("❌ Invalid License! This exe is not authorized for this machine.")
+        sys.exit(1)
+    else:
+        print("✅ License validated. Running application...")
+
+# ---------------- Resource Path ----------------
+def resource_path(relative_path):
+    """ Get absolute path for PyInstaller """
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+# ---------------- Fire Detector ----------------
 class MultiCamDetector:
-    def __init__(self, model_path="data/models/best.pt", confidence_threshold=0.25):
-        print(f"🔄 Loading YOLOv8 model from {model_path} ...")
-        self.model = YOLO(model_path)  # YOLOv8 model
-        self.confidence_threshold = confidence_threshold
-        self.model_lock = threading.Lock()  # lock to avoid GPU/CPU conflicts
+    def __init__(self, model_path=None, confidence_threshold=0.25):
+        if model_path is None:
+            model_path = resource_path("data/models/best.pt")
+        else:
+            model_path = resource_path(model_path)
 
-        # 🔔 Setup siren
+        print(f"🔄 Loading YOLOv8 model from {model_path} ...")
+        self.model = YOLO(model_path)
+        self.confidence_threshold = confidence_threshold
+        self.model_lock = threading.Lock()
         pygame.mixer.init()
         self.siren_playing = False
 
-        # 📝 Setup logging
         os.makedirs("outputs/logs", exist_ok=True)
         log_file = datetime.datetime.now().strftime("outputs/logs/multicam_%Y%m%d_%H%M.log")
         self.log_fh = open(log_file, "a")
 
     # ---------------- Siren ----------------
-    def play_siren(self, siren_path="data/siren/fire-alarm.mp3"):
+    def play_siren(self, siren_path=None):
+        if siren_path is None:
+            siren_path = resource_path("data/siren/fire-alarm.mp3")
+        else:
+            siren_path = resource_path(siren_path)
+
         if not self.siren_playing:
             try:
                 pygame.mixer.music.load(siren_path)
-                pygame.mixer.music.play(-1)  # loop until stopped
+                pygame.mixer.music.play(-1)
                 self.siren_playing = True
                 print("🚨 Siren started!")
             except Exception as e:
@@ -48,7 +89,7 @@ class MultiCamDetector:
         self.log_fh.write(line + "\n")
         self.log_fh.flush()
 
-    # ---------------- Process one camera ----------------
+    # ---------------- Process Camera ----------------
     def process_camera(self, cam_name, source, stop_event):
         try:
             cap = cv2.VideoCapture(source)
@@ -77,31 +118,27 @@ class MultiCamDetector:
 
                 result_img = results[0].plot()
                 out.write(cv2.cvtColor(result_img, cv2.COLOR_RGB2BGR))
-
                 cv2.imshow(cam_name, cv2.cvtColor(result_img, cv2.COLOR_RGB2BGR))
 
-                # 🔎 Check detections
                 for box in results[0].boxes:
                     cls_id = int(box.cls[0])
                     conf = float(box.conf[0])
                     label = results[0].names[cls_id]
                     self.log_detection(cam_name, label, conf)
-
                     if label in ["fire", "smoke"] and conf > 0.3:
                         self.play_siren()
 
                 if cv2.waitKey(1) & 0xFF == ord("q"):
-                    stop_event.set()  # tell all threads to stop
+                    stop_event.set()
 
             cap.release()
             out.release()
             cv2.destroyWindow(cam_name)
             print(f"✅ Finished {cam_name} processing.")
-
         except Exception as e:
             print(f"⚠️ Error in camera {cam_name}: {e}")
 
-    # ---------------- Multi-Camera Runner ----------------
+    # ---------------- Run from Config ----------------
     def run_from_config(self, config_file="cameras.json"):
         if not os.path.exists(config_file):
             print(f"❌ Config not found: {config_file}")
@@ -115,9 +152,7 @@ class MultiCamDetector:
         for cam in cameras:
             name = cam.get("name") or f"cam_{len(threads)+1}"
             source = cam.get("source")
-            t = threading.Thread(
-                target=self.process_camera, args=(name, source, stop_event), daemon=True
-            )
+            t = threading.Thread(target=self.process_camera, args=(name, source, stop_event), daemon=True)
             t.start()
             threads.append(t)
 
@@ -133,6 +168,35 @@ class MultiCamDetector:
             print("🛑 Shutdown complete.")
 
 
+# ---------------- MAIN ----------------
 if __name__ == "__main__":
-    detector = MultiCamDetector(model_path="data/models/best.pt")
-    detector.run_from_config("cameras.json")
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Multi-Camera Fire/Smoke Detection with Siren")
+    parser.add_argument("--config", type=str, help="Path to JSON config file containing camera sources")
+    parser.add_argument("--model", type=str, default="data/models/best.pt", help="Path to trained YOLO model")
+    parser.add_argument("--conf", type=float, default=0.25, help="Confidence threshold for detection")
+    parser.add_argument("--get-hwid", action="store_true", help="Generate and print hardware ID")
+    parser.add_argument("--license", type=str, default="license.lic", help="Path to license file")
+
+    args = parser.parse_args()
+
+    # ------------------ HWID mode ------------------
+    if args.get_hwid:
+        hwid = get_hardware_id()
+        print("Your Hardware ID:", hwid)
+        with open("hwid.txt", "w") as f:
+            f.write(hwid)
+        print("✅ HWID saved to hwid.txt")
+        sys.exit(0)
+
+    # ------------------ Normal mode ------------------
+    if not args.config:
+        parser.error("the following argument is required: --config")
+
+    # Validate license (put your validate_license function here or import)
+    validate_license(args.license)
+
+    # Run detection
+    detector = MultiCamDetector(model_path=args.model, confidence_threshold=args.conf)
+    detector.run_from_config(config_file=args.config)
