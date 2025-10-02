@@ -50,7 +50,7 @@ fire-detection-ai/
 
 ### 1. Clone the Repository
 
-```bash
+bash
 git clone https://github.com/YOUR_USERNAME/fire-detection-ai.git
 cd fire-detection-ai
 2. Set up Virtual Environment
@@ -60,7 +60,7 @@ fire-env\Scripts\activate      # Windows
 # Install dependencies
 pip install -r requirements.txt
 
-### 🏋️ Training (in Colab)
+## 🏋️ Training (in Colab)
 We trained the model in Google Colab using fire_smoke.zip dataset.
 # Steps:
 Upload fire_smoke.zip to Drive (/MyDrive/fire_detection/datasets/).
@@ -110,6 +110,41 @@ python src/multi_cam_detector.py
 Annotated images → outputs/
 Annotated videos → outputs/videos/
 Logs → outputs/multicam_YYYY-MM-DD.log
+
+🔥 Multi-Camera Fire & Smoke Detection
+This module allows real-time fire/smoke detection from multiple camera feeds (video files, RTSP streams, or webcams) in parallel.
+It also supports siren alerts and detection logging.
+1️⃣ Setup
+Make sure you have your virtual environment active:
+conda activate fire-env   # or
+.\fire-env\Scripts\activate
+Install dependencies (if not already done):
+pip install ultralytics opencv-python pygame
+2️⃣ Camera Configuration
+Feeds are managed via cameras.json.
+Example:
+[
+  { "name": "Parking-Cam", "source": "data/videos/3742-174173818_tiny.mp4" },
+  { "name": "Warehouse-Cam", "source": "data/videos/199788-911378451_tiny.mp4" },
+  { "name": "Office-Cam", "source": 0 }
+]
+name: Friendly identifier used in logs & output filenames.
+source: Can be Path to a video file (.mp4, .avi)
+Camera index (0 = default laptop webcam, 1 = external webcam)
+RTSP/HTTP stream URL from an IP camera
+3️⃣ Run the Multi-Camera Detector
+python src/multi_cam_detector.py
+4️⃣ Outputs
+Annotated videos saved to: outputs/videos/
+Detection logs (with timestamps & camera names): outputs/multicam_detections.log
+Siren (data/siren/fire-alarm.mp3) plays whenever fire/smoke is detected.
+5️⃣ Controls
+Stop video preview: Press q
+Stop entire program: Press Ctrl+C in terminal
+6️⃣ Notes
+Heavy 24x7 logging may fill disk space. Rotate or archive logs regularly.
+Large .avi output files may also need rotation/deletion in production.
+For real deployment → use RTSP IP camera streams instead of local videos.
 
 ### 📦 Model
 Place your trained YOLOv8 model (best.pt) inside data/models/

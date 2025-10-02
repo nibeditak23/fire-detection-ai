@@ -6,5 +6,9 @@
   {
     "name": "Warehouse-Cam",
     "source": "data/videos/199788-911378451_tiny.mp4"
+  },
+    {
+    "name": "Lobby-Cam",
+    "source": "data/videos/90996-629483723_tiny.mp4"
   }
 ]
