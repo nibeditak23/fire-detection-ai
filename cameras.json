@@ -1,4 +1,8 @@
-[
+{
+  "alerts": {
+    "recipients": ["+919861284862"]
+  },
+"cameras": [
   {
     "name": "Parking-Cam",
     "source": "data/videos/3742-174173818_tiny.mp4"
@@ -12,3 +16,4 @@
     "source": "data/videos/90996-629483723_tiny.mp4"
   }
 ]
+}

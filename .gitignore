@@ -1,6 +1,9 @@
-# Python cache
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.log
 
 # Virtual environment
 fire-env/
@@ -23,3 +26,9 @@ runs/
 # Ignore temporary files
 *.cache
 *.log
+
+# Env & credentials
+.env
+license.lic
+*.bak
+*.tmp
